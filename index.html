@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Niña Bonita Ventas</title>
+  <meta name="description" content="Tienda simple con catálogo, búsqueda, carrito y pedidos por WhatsApp." />
+  <style>
+    :root{
+      --bg:#0b0f14; --card:#111826; --muted:#9aa4b2; --text:#e8eef6;
+      --line:#1f2a3a; --accent:#7dd3fc; --accent2:#a78bfa; --bad:#fb7185;
+      --shadow: 0 10px 30px rgba(0,0,0,.35); --radius: 18px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--font);
+      background:
+        radial-gradient(1200px 800px at 10% 0%, rgba(125,211,252,.10), transparent 60%),
+        radial-gradient(900px 700px at 90% 10%, rgba(167,139,250,.12), transparent 55%),
+        linear-gradient(180deg, #070a0f, var(--bg));
+      color:var(--text);
+    }
+    header{position:sticky; top:0; z-index:20; backdrop-filter: blur(10px);
+      background: rgba(7,10,15,.68); border-bottom:1px solid rgba(31,42,58,.7);}
+    .wrap{max-width:1100px; margin:0 auto; padding:18px 16px;}
+    .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+    .brand{display:flex; align-items:center; gap:10px; padding:6px 10px;
+      border:1px solid rgba(31,42,58,.8); border-radius:999px; background:rgba(17,24,38,.6);}
+    .logo{width:34px; height:34px; border-radius:10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow: 0 8px 18px rgba(125,211,252,.18);}
+    .muted{color:var(--muted); font-size:.92rem}
+    .spacer{flex:1}
+    .chipbar{display:flex; gap:8px; flex-wrap:wrap}
+    .chip{cursor:pointer; user-select:none; padding:8px 12px; border-radius:999px;
+      border:1px solid rgba(31,42,58,.85); background:rgba(17,24,38,.55); color:var(--text);
+      font-size:.92rem; transition:.15s transform, .15s border-color, .15s background;}
+    .chip:hover{transform:translateY(-1px); border-color:rgba(125,211,252,.55)}
+    .chip.active{background: linear-gradient(135deg, rgba(125,211,252,.20), rgba(167,139,250,.18));
+      border-color: rgba(125,211,252,.55);}
+    .search{display:flex; gap:10px; align-items:center; flex:1; min-width:240px;
+      padding:10px 12px; border-radius:999px; background:rgba(17,24,38,.6);
+      border:1px solid rgba(31,42,58,.85);}
+    .search input{width:100%; border:none; outline:none; background:transparent; color:var(--text); font-size:1rem;}
+    .btn{cursor:pointer; border:none; outline:none; padding:10px 12px; border-radius:12px;
+      background:rgba(17,24,38,.65); border:1px solid rgba(31,42,58,.9); color:var(--text);
+      transition:.15s transform, .15s border-color, .15s background;}
+    .btn:hover{transform:translateY(-1px); border-color: rgba(167,139,250,.55)}
+    .btn.primary{background: linear-gradient(135deg, rgba(125,211,252,.24), rgba(167,139,250,.22));
+      border-color: rgba(125,211,252,.55);}
+    main{padding:18px 0 80px}
+    .hero{border:1px solid rgba(31,42,58,.85); background:rgba(17,24,38,.45); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding:18px; display:flex; gap:16px; align-items:center; flex-wrap:wrap;}
+    .hero h1{margin:0; font-size:1.25rem}
+    .hero p{margin:6px 0 0; color:var(--muted)}
+    .grid{margin-top:16px; display:grid; grid-template-columns: repeat(12, 1fr); gap:12px;}
+    .card{grid-column: span 6; border:1px solid rgba(31,42,58,.85); background:rgba(17,24,38,.52);
+      border-radius: var(--radius); box-shadow: 0 14px 30px rgba(0,0,0,.28); overflow:hidden; display:flex; flex-direction:column;}
+    @media (min-width: 820px){ .card{grid-column: span 4;} }
+    @media (max-width: 480px){ .card{grid-column: span 12;} }
+
+    .media{height:170px; border-bottom:1px solid rgba(31,42,58,.7); background: rgba(7,10,15,.20);
+      display:flex; align-items:center; justify-content:center; overflow:hidden;}
+    .media img{width:100%; height:100%; object-fit:cover; display:block;}
+    .media video{width:100%; height:100%; object-fit:cover; display:block;}
+    .placeholder{font-size:2rem; opacity:.9; filter: drop-shadow(0 8px 14px rgba(0,0,0,.35));}
+
+    .content{padding:12px 12px 14px}
+    .title{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+    .title b{font-size:1.02rem}
+    .tag{font-size:.78rem; color:var(--muted); padding:6px 8px; border:1px solid rgba(31,42,58,.85);
+      border-radius:999px; white-space:nowrap; background:rgba(7,10,15,.35);}
+    .price{margin-top:8px; font-weight:700}
+    .small{font-size:.9rem; color:var(--muted)}
+    .actions{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap}
+    .actions .btn{flex:1; min-width:140px}
+
+    .footerbar{position:fixed; bottom:0; left:0; right:0; z-index:25; background: rgba(7,10,15,.80);
+      border-top:1px solid rgba(31,42,58,.7); backdrop-filter: blur(10px);}
+    .cart{display:flex; gap:12px; align-items:center; justify-content:space-between; padding:10px 16px; max-width:1100px; margin:0 auto;}
+    .modal{position:fixed; inset:0; display:none; z-index:50; background: rgba(0,0,0,.55); padding:16px;}
+    .modal.open{display:flex; align-items:flex-end;}
+    @media (min-width: 700px){ .modal.open{align-items:center; justify-content:center;} }
+    .sheet{width:100%; max-width:720px; border-radius: 22px; border:1px solid rgba(31,42,58,.9);
+      background: rgba(11,15,20,.92); box-shadow: 0 20px 60px rgba(0,0,0,.55); overflow:hidden;}
+    .sheet .top{display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px;
+      border-bottom:1px solid rgba(31,42,58,.7);}
+    .sheet .body{padding:14px}
+    .list{display:flex; flex-direction:column; gap:10px}
+    .item{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:10px 10px;
+      border:1px solid rgba(31,42,58,.8); border-radius: 14px; background: rgba(17,24,38,.45);}
+    .qty{display:flex; gap:8px; align-items:center}
+    .iconbtn{width:34px; height:34px; border-radius:12px; border:1px solid rgba(31,42,58,.9);
+      background: rgba(7,10,15,.35); color:var(--text); cursor:pointer;}
+    .total{margin-top:12px; display:flex; justify-content:space-between; align-items:center; padding:12px;
+      border-radius: 16px; border:1px solid rgba(31,42,58,.85);
+      background: linear-gradient(135deg, rgba(125,211,252,.14), rgba(167,139,250,.12));}
+    form{display:grid; gap:10px;}
+    .grid2{display:grid; grid-template-columns:1fr; gap:10px}
+    @media (min-width: 720px){ .grid2{grid-template-columns:1fr 1fr;} }
+    label{font-size:.92rem; color:var(--muted)}
+    input, select, textarea{width:100%; padding:11px 12px; border-radius: 12px;
+      border:1px solid rgba(31,42,58,.9); background: rgba(17,24,38,.55); color: var(--text); outline:none;}
+    textarea{min-height:84px; resize:vertical}
+    .hint{font-size:.88rem; color:var(--muted)}
+    .danger{color:var(--bad)}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="row">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <b>Niña Bonita Ventas</b><br/>
+          <span class="muted">Electrodomésticos · Ropa · Perfumes · Zapatos</span>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <button class="btn primary" id="openPublish">+ Publicar producto</button>
+      <button class="btn" id="openCart">🛒 Carrito (<span id="cartCount">0</span>)</button>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <div class="search" style="flex:1">
+        🔎 <input id="q" placeholder="Buscar: licuadora, perfume, zapatilla, remera..." />
+      </div>
+      <div class="chipbar" id="chips"></div>
+      <button class="btn" id="clearFilters">Limpiar</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="hero">
+      <div style="flex:1; min-width:240px">
+        <h1>Catálogo listo para vender por WhatsApp</h1>
+        <p>Agregá productos, cargá foto/video y enviá el pedido con un toque.</p>
+        <p class="hint">WhatsApp fijo: <b>595984124627</b></p>
+      </div>
+    </section>
+
+    <section class="grid" id="grid"></section>
+
+    <p class="muted" style="margin-top:14px">
+      Importante: GitHub Pages no permite que clientes suban archivos al “servidor”. Para que todos vean tus fotos/videos,
+      subilos al repo (carpeta media/) y pegá el link en “URL de foto/video”.
+    </p>
+  </div>
+</main>
+
+<div class="footerbar">
+  <div class="cart">
+    <div>
+      <strong>Total: </strong> <span id="totalLabel">₲ 0</span>
+      <div class="muted" style="font-size:.9rem">Agregá productos y enviá el pedido por WhatsApp.</div>
+    </div>
+    <button class="btn primary" id="sendWhats">Enviar pedido por WhatsApp</button>
+  </div>
+</div>
+
+<!-- Modal carrito -->
+<div class="modal" id="cartModal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div class="top">
+      <b>🛒 Carrito</b>
+      <button class="btn" id="closeCart">Cerrar</button>
+    </div>
+    <div class="body">
+      <div class="list" id="cartList"></div>
+      <div class="total">
+        <div>
+          <div class="hint">Total</div>
+          <b id="totalLabel2">₲ 0</b>
+        </div>
+        <button class="btn primary" id="sendWhats2">Enviar por WhatsApp</button>
+      </div>
+      <button class="btn" id="clearCart" style="margin-top:10px">Vaciar carrito</button>
+      <p class="hint">El pedido se envía al WhatsApp fijo configurado en el código.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal publicar -->
+<div class="modal" id="publishModal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div class="top">
+      <b>+ Publicar producto</b>
+      <button class="btn" id="closePublish">Cerrar</button>
+    </div>
+    <div class="body">
+      <form id="publishForm">
+        <div class="grid2">
+          <div>
+            <label>Nombre del producto</label>
+            <input id="pName" required placeholder="Ej: Heladera usada" />
+          </div>
+          <div>
+            <label>Precio (solo número)</label>
+            <input id="pPrice" required inputmode="numeric" placeholder="Ej: 150000" />
+            <div class="hint">Moneda: guaraní (₲)</div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label>Categoría</label>
+            <select id="pCat" required>
+              <option value="Electrodomésticos">Electrodomésticos</option>
+              <option value="Ropa">Ropa</option>
+              <option value="Perfumes">Perfumes</option>
+              <option value="Zapatos">Zapatos</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+          <div>
+            <label>Emoji/Ícono (opcional)</label>
+            <input id="pEmoji" placeholder="Ej: 🧺 👟 🧴 👚" />
+          </div>
+        </div>
+
+        <div>
+          <label>Descripción (opcional)</label>
+          <textarea id="pDesc" placeholder="Talle, color, estado, entrega, etc."></textarea>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label>Subir foto o video (opcional)</label>
+            <input id="pFile" type="file" accept="image/*,video/*" />
+            <div class="hint">
+              Esto guarda el archivo en <b>tu navegador</b> (tu celu). Si querés que lo vea todo el mundo, usá la URL.
+            </div>
+          </div>
+          <div>
+            <label>URL de foto/video (opcional, recomendado para GitHub)</label>
+            <input id="pMediaUrl" placeholder="Ej: media/zapas.jpg o https://..." />
+            <div class="hint">Si subís archivos al repo en carpeta <b>media/</b>, poné: <b>media/archivo.jpg</b></div>
+          </div>
+        </div>
+
+        <button class="btn primary" type="submit">Guardar producto</button>
+        <p class="hint danger" id="warn"></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // WhatsApp fijo (Paraguay): 595 + 984124627
+  const FIXED_WA = "595984124627";
+
+  const DEFAULT_PRODUCTS = [
+    { id: crypto.randomUUID(), name:"Licuadora 2V", price:180000, cat:"Electrodomésticos", emoji:"🌀",
+      desc:"Buen estado. Entrega a coordinar.", mediaType:"", mediaSrc:"", mediaUrl:"" },
+    { id: crypto.randomUUID(), name:"Perfume 100ml", price:250000, cat:"Perfumes", emoji:"🧴",
+      desc:"Nuevo / sellado.", mediaType:"", mediaSrc:"", mediaUrl:"" },
+    { id: crypto.randomUUID(), name:"Zapatillas blancas", price:220000, cat:"Zapatos", emoji:"👟",
+      desc:"Consultar stock.", mediaType:"", mediaSrc:"", mediaUrl:"" }
+  ];
+
+  const CATS = ["Todo","Electrodomésticos","Ropa","Perfumes","Zapatos","Otros"];
+
+  const LS_PRODUCTS = "nbv_products_v2_media";
+  const LS_CART = "nbv_cart_v1";
+
+  let products = loadProducts();
+  let cart = loadCart();
+  let activeCat = "Todo";
+  let query = "";
+
+  const grid = document.getElementById("grid");
+  const chips = document.getElementById("chips");
+  const q = document.getElementById("q");
+  const clearFilters = document.getElementById("clearFilters");
+
+  const cartCount = document.getElementById("cartCount");
+  const totalLabel = document.getElementById("totalLabel");
+  const totalLabel2 = document.getElementById("totalLabel2");
+  const sendWhats = document.getElementById("sendWhats");
+  const sendWhats2 = document.getElementById("sendWhats2");
+
+  const cartModal = document.getElementById("cartModal");
+  const openCart = document.getElementById("openCart");
+  const closeCart = document.getElementById("closeCart");
+  const cartList = document.getElementById("cartList");
+  const clearCartBtn = document.getElementById("clearCart");
+
+  const publishModal = document.getElementById("publishModal");
+  const openPublish = document.getElementById("openPublish");
+  const closePublish = document.getElementById("closePublish");
+  const publishForm = document.getElementById("publishForm");
+
+  const pName = document.getElementById("pName");
+  const pPrice = document.getElementById("pPrice");
+  const pCat = document.getElementById("pCat");
+  const pEmoji = document.getElementById("pEmoji");
+  const pDesc = document.getElementById("pDesc");
+  const pFile = document.getElementById("pFile");
+  const pMediaUrl = document.getElementById("pMediaUrl");
+  const warn = document.getElementById("warn");
+
+  function renderChips(){
+    chips.innerHTML = "";
+    CATS.forEach(cat=>{
+      const el = document.createElement("div");
+      el.className = "chip" + (cat===activeCat ? " active":"");
+      el.textContent = cat;
+      el.onclick = ()=>{ activeCat = cat; render(); };
+      chips.appendChild(el);
+    });
+  }
+
+  function filteredProducts(){
+    const ql = query.trim().toLowerCase();
+    return products.filter(p=>{
+      const inCat = (activeCat==="Todo") || (p.cat===activeCat);
+      const inQ = !ql || (p.name.toLowerCase().includes(ql) || (p.desc||"").toLowerCase().includes(ql));
+      return inCat && inQ;
+    });
+  }
+
+  function formatPYG(n){
+    try{ return "₲ " + Number(n).toLocaleString("es-PY"); }
+    catch{ return "₲ " + n; }
+  }
+
+  function mediaHtml(p){
+    const src = (p.mediaUrl && p.mediaUrl.trim()) ? p.mediaUrl.trim() : p.mediaSrc;
+    const type = p.mediaType || "";
+    if(!src){
+      return `<div class="media"><div class="placeholder">${escapeHtml(p.emoji || "🛍️")}</div></div>`;
+    }
+    if(type.startsWith("video/")){
+      return `<div class="media"><video controls playsinline src="${escapeAttr(src)}"></video></div>`;
+    }
+    // default imagen
+    return `<div class="media"><img alt="${escapeAttr(p.name)}" src="${escapeAttr(src)}"></div>`;
+  }
+
+  function renderProducts(){
+    const list = filteredProducts();
+    grid.innerHTML = "";
+    if(list.length===0){
+      grid.innerHTML = `
+        <div class="card" style="grid-column: span 12">
+          <div class="content">
+            <b>No hay productos con ese filtro/búsqueda.</b>
+            <div class="small">Probá limpiar filtros o publicar un producto nuevo.</div>
+          </div>
+        </div>`;
+      return;
+    }
+
+    list.forEach(p=>{
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        ${mediaHtml(p)}
+        <div class="content">
+          <div class="title">
+            <b>${escapeHtml(p.name)}</b>
+            <span class="tag">${escapeHtml(p.cat)}</span>
+          </div>
+          <div class="price">${formatPYG(p.price)}</div>
+          <div class="small">${escapeHtml(p.desc || "Sin descripción")}</div>
+          <div class="actions">
+            <button class="btn primary" data-add="${p.id}">Agregar al carrito</button>
+            <button class="btn" data-del="${p.id}">Eliminar</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    grid.querySelectorAll("[data-add]").forEach(btn=>{
+      btn.onclick = ()=>{
+        const id = btn.getAttribute("data-add");
+        cart[id] = (cart[id]||0) + 1;
+        saveCart();
+        renderCartBadge();
+        renderTotals();
+      };
+    });
+
+    grid.querySelectorAll("[data-del]").forEach(btn=>{
+      btn.onclick = ()=>{
+        const id = btn.getAttribute("data-del");
+        const p = products.find(x=>x.id===id);
+        if(confirm(`¿Eliminar "${p?.name || "producto"}"?`)){
+          products = products.filter(x=>x.id!==id);
+          delete cart[id];
+          saveProducts();
+          saveCart();
+          render();
+        }
+      };
+    });
+  }
+
+  function cartItems(){
+    return Object.entries(cart)
+      .map(([id,qty])=>{
+        const p = products.find(x=>x.id===id);
+        if(!p) return null;
+        return { ...p, qty };
+      })
+      .filter(Boolean);
+  }
+
+  function calcTotal(){
+    return cartItems().reduce((acc,it)=> acc + (Number(it.price)||0)*it.qty, 0);
+  }
+
+  function renderCartBadge(){
+    const count = Object.values(cart).reduce((a,b)=>a+b,0);
+    cartCount.textContent = count;
+  }
+
+  function renderTotals(){
+    const t = calcTotal();
+    totalLabel.textContent = formatPYG(t);
+    totalLabel2.textContent = formatPYG(t);
+  }
+
+  function renderCartModal(){
+    const items = cartItems();
+    cartList.innerHTML = "";
+    if(items.length===0){
+      cartList.innerHTML = `
+        <div class="item">
+          <div>
+            <b>Tu carrito está vacío</b>
+            <div class="muted">Agregá productos desde el catálogo.</div>
+          </div>
+        </div>`;
+      renderTotals();
+      return;
+    }
+    items.forEach(it=>{
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div style="min-width:0">
+          <b>${escapeHtml(it.name)}</b>
+          <div class="muted">${escapeHtml(it.cat)} · ${formatPYG(it.price)}</div>
+        </div>
+        <div class="qty">
+          <button class="iconbtn" data-minus="${it.id}">−</button>
+          <b>${it.qty}</b>
+          <button class="iconbtn" data-plus="${it.id}">+</button>
+        </div>
+      `;
+      cartList.appendChild(el);
+    });
+
+    cartList.querySelectorAll("[data-minus]").forEach(b=>{
+      b.onclick = ()=>{
+        const id = b.getAttribute("data-minus");
+        cart[id] = Math.max(0, (cart[id]||0)-1);
+        if(cart[id]===0) delete cart[id];
+        saveCart();
+        renderCartModal();
+        renderCartBadge();
+        renderTotals();
+      };
+    });
+    cartList.querySelectorAll("[data-plus]").forEach(b=>{
+      b.onclick = ()=>{
+        const id = b.getAttribute("data-plus");
+        cart[id] = (cart[id]||0)+1;
+        saveCart();
+        renderCartModal();
+        renderCartBadge();
+        renderTotals();
+      };
+    });
+
+    renderTotals();
+  }
+
+  function buildWhatsMessage(){
+    const items = cartItems();
+    const lines = [];
+    lines.push(`Hola! Quiero hacer un pedido:`);
+    lines.push("");
+    items.forEach(it=>{
+      const sub = (Number(it.price)||0)*it.qty;
+      lines.push(`• ${it.name} x${it.qty} — ${formatPYG(sub)}`);
+    });
+    lines.push("");
+    lines.push(`Total: ${formatPYG(calcTotal())}`);
+    lines.push("");
+    lines.push("¿Me confirmás disponibilidad y entrega? Gracias!");
+    return lines.join("\n");
+  }
+
+  function openWhats(){
+    const items = cartItems();
+    if(items.length===0){ alert("Tu carrito está vacío."); return; }
+    const text = encodeURIComponent(buildWhatsMessage());
+    const url = `https://wa.me/${encodeURIComponent(FIXED_WA)}?text=${text}`;
+    window.open(url, "_blank");
+  }
+
+  // Guardado
+  function loadProducts(){
+    try{
+      const raw = localStorage.getItem(LS_PRODUCTS);
+      if(!raw) return DEFAULT_PRODUCTS;
+      const parsed = JSON.parse(raw);
+      if(!Array.isArray(parsed)) return DEFAULT_PRODUCTS;
+      return parsed;
+    }catch{ return DEFAULT_PRODUCTS; }
+  }
+  function saveProducts(){ localStorage.setItem(LS_PRODUCTS, JSON.stringify(products)); }
+
+  function loadCart(){
+    try{
+      const raw = localStorage.getItem(LS_CART);
+      if(!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed==="object" ? parsed : {};
+    }catch{ return {}; }
+  }
+  function saveCart(){ localStorage.setItem(LS_CART, JSON.stringify(cart)); }
+
+  // Eventos
+  q.addEventListener("input", (e)=>{ query = e.target.value; renderProducts(); });
+
+  clearFilters.onclick = ()=>{ activeCat="Todo"; query=""; q.value=""; render(); };
+
+  openCart.onclick = ()=>{ renderCartModal(); cartModal.classList.add("open"); };
+  closeCart.onclick = ()=> cartModal.classList.remove("open");
+  cartModal.addEventListener("click", (e)=>{ if(e.target===cartModal) cartModal.classList.remove("open"); });
+
+  openPublish.onclick = ()=> publishModal.classList.add("open");
+  closePublish.onclick = ()=> publishModal.classList.remove("open");
+  publishModal.addEventListener("click", (e)=>{ if(e.target===publishModal) publishModal.classList.remove("open"); });
+
+  sendWhats.onclick = openWhats;
+  sendWhats2.onclick = openWhats;
+
+  clearCartBtn.onclick = ()=>{
+    cart = {};
+    saveCart();
+    renderCartModal();
+    renderCartBadge();
+    renderTotals();
+  };
+
+  // Convertir archivo a DataURL (base64)
+  function fileToDataURL(file){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = ()=> resolve(reader.result);
+      reader.onerror = ()=> reject(new Error("No se pudo leer el archivo"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  publishForm.onsubmit = async (e)=>{
+    e.preventDefault();
+    warn.textContent = "";
+
+    const name = pName.value.trim();
+    const price = Number(String(pPrice.value).replace(/[^\d]/g,""));
+    const cat = pCat.value;
+    const emoji = (pEmoji.value.trim() || "🛍️");
+    const desc = pDesc.value.trim();
+    const mediaUrl = pMediaUrl.value.trim();
+
+    if(!name){ warn.textContent="Falta el nombre del producto."; return; }
+    if(!price || price<=0){ warn.textContent="El precio debe ser un número mayor a 0."; return; }
+
+    // Si hay archivo local: guardamos base64 (solo tu navegador)
+    let mediaType = "";
+    let mediaSrc = "";
+
+    const file = pFile.files && pFile.files[0] ? pFile.files[0] : null;
+    if(file){
+      // Aviso realista: videos grandes pueden fallar por límite de almacenamiento
+      try{
+        mediaType = file.type || "";
+        mediaSrc = await fileToDataURL(file);
+      }catch{
+        warn.textContent = "No se pudo cargar ese archivo. Probá con uno más liviano.";
+        return;
+      }
+    }
+
+    products.unshift({
+      id: crypto.randomUUID(),
+      name, price, cat, emoji, desc,
+      mediaType,
+      mediaSrc,
+      mediaUrl
+    });
+
+    saveProducts();
+    pName.value=""; pPrice.value=""; pEmoji.value=""; pDesc.value="";
+    pFile.value=""; pMediaUrl.value="";
+    render();
+    publishModal.classList.remove("open");
+  };
+
+  function escapeHtml(str){
+    return String(str ?? "")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+  function escapeAttr(str){ return escapeHtml(str).replaceAll("`","&#096;"); }
+
+  function render(){
+    renderChips();
+    renderProducts();
+    renderCartBadge();
+    renderTotals();
+  }
+
+  render();
+</script>
+</body>
+</html>
